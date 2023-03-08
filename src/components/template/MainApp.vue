@@ -1,7 +1,7 @@
 <template>
-	<main class="main">
-		<CountryInfos :cityName="forecastData.name" :countryFlag="forecastData.sys?.country"/>
-		<DayTime />
+	<main class="main" v-if="forecastData.sys">
+		<CountryInfos :cityName="forecastData.name" :country="forecastData.sys.country" />
+		<DayTime :icon="forecastData.weather[0].icon" :skyState="forecastData.weather[0].main"/>
 		<SearchApp />
 		<ForecastInfos />
 		<OtherInfos />
@@ -50,7 +50,7 @@ export default {
 				.then(resp => this.forecastData = resp.data);
 		}
 	},
-	mounted() {
+	created() {
 		this.getGeolocation();
 	}
 }
