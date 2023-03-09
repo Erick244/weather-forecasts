@@ -1,6 +1,6 @@
 <template>
 	<div class="search">
-		<input type="text" placeholder="your city..." v-model="city">
+		<input type="text" placeholder="Search for cities..." v-model="city">
 		<button @click="search">
 			<i class="fa-solid fa-magnifying-glass"></i>
 		</button>
@@ -18,7 +18,6 @@ export default {
 	},
 	methods: {
 		search() {
-			if (!this.city) return;
 			this.searchFunction(this.city);
 		}
 	}

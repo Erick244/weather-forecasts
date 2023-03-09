@@ -1,11 +1,27 @@
 <template>
 	<main class="main" v-if="forecastData.sys && flagImageUrl">
-		<CountryInfos :cityName="forecastData.name" :country="forecastData.sys.country" />
-		<DayTime :icon="forecastData.weather[0].icon" :skyState="forecastData.weather[0].main" />
-		<SearchApp :searchFunction="getWeatherForecasts" />
-		<ForecastInfos :minTemp="forecastData.main.temp_min" :maxTemp="forecastData.main.temp_max"
-			:currentTemp="forecastData.main.temp" />
-		<OtherInfos :windSpeed="forecastData.wind.speed" :humidity="forecastData.main.humidity" :flagImage="flagImageUrl" />
+		<CountryInfos 
+			:cityName="forecastData.name" 
+			:country="forecastData.sys.country" 
+		/>
+		<DayTime 
+			:icon="forecastData.weather[0].icon" 
+			:skyState="forecastData.weather[0].main" 
+			:cityName="forecastData.name"
+		/>
+		<SearchApp 
+		:searchFunction="getWeatherForecasts" 
+		/>
+		<ForecastInfos 
+			:minTemp="forecastData.main.temp_min" 
+			:maxTemp="forecastData.main.temp_max"
+			:currentTemp="forecastData.main.temp" 
+		/>
+		<OtherInfos 
+			:windSpeed="forecastData.wind.speed" 
+			:humidity="forecastData.main.humidity" 
+			:flagImage="flagImageUrl" 
+		/>
 	</main>
 	<SkeletonPage v-else />
 </template>
@@ -18,7 +34,7 @@ import ForecastInfos from "../view/ForecastInfos.vue";
 import OtherInfos from "../view/OtherInfos.vue";
 import SkeletonPage from "./SkeletonPage.vue";
 import axios from "axios";
-import { API_TOKEN } from "@/config/.env";
+import { WEATHER_FORECASTS_TOKEN } from "@/config/.env";
 
 export default {
 	name: "MainApp",
@@ -41,7 +57,7 @@ export default {
 			const getCurrentPositionHandler = async (loc) => {
 				const lat = loc.coords.latitude;
 				const lon = loc.coords.longitude;
-				const geolocationUrl = `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_TOKEN}`;
+				const geolocationUrl = `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${WEATHER_FORECASTS_TOKEN}`;
 				const resp = await axios.get(geolocationUrl);
 				const data = await resp.data;
 				const cityName = data[0].name;
@@ -52,7 +68,11 @@ export default {
 			});
 		},
 		async getWeatherForecasts(cityName) {
-			const weatherForecastsUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${API_TOKEN}&lang=pt_br`;
+			if (!cityName) {
+				this.getGeolocation();
+				return;
+			}
+			const weatherForecastsUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${WEATHER_FORECASTS_TOKEN}&lang=pt_br`;
 			axios.get(weatherForecastsUrl)
 				.then(resp => resp.data)
 				.then(data => {

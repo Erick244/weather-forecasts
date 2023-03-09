@@ -9,22 +9,25 @@
 
 <script>
 import { baseForecastIconAPI } from "@/config/globals";
+import { TIMEZONE_TOKEN } from "../../config/.env";
+import axios from "axios";
 
 export default {
 	name: "DayTime",
-	props: ["icon", "skyState"],
+	props: ["icon", "skyState", "cityName"],
 	data() {
 		return {
 			forecastImageUrl: `${baseForecastIconAPI}/${this.icon}@2x.png`,
-			hours: new Date().getHours()
+			hours: null
 		}
 	},
 	methods: {
-		getHours() {
-			const date = new Date();
-			const hour = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-			const minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-			let hours = `${hour}:${minutes}`;
+		async getHours() {
+			const resp = await axios.get(`https://timezone.abstractapi.com/v1/current_time?api_key=${TIMEZONE_TOKEN}&location=${this.cityName}`);
+			const date = await resp.data;
+			const regex = /[0-9]{2}[:][0-9]{2}/; // 0000-00-00 "00:00":00
+			let hours = regex.exec(date.datetime)[0];
+			const hour = hours.split(":")[0];
 			hour > 0 && hour < 12 ? hours += "AM" : hours += "PM";
 			this.hours = hours;
 		}
@@ -32,6 +35,9 @@ export default {
 	updated() {
 		this.getHours();
 		this.forecastImageUrl = `${baseForecastIconAPI}/${this.icon}@2x.png`;
+	},
+	mounted() {
+		this.getHours();
 	}
 }
 </script>
