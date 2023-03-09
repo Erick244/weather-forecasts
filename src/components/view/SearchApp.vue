@@ -1,6 +1,11 @@
 <template>
 	<div class="search">
-		<input type="text" placeholder="Search for cities..." v-model="city">
+		<input 
+			@keyup="$event => handlerKeyUp($event)"
+			type="text" 
+			placeholder="Search for cities..." 
+			v-model="city"
+		>
 		<button @click="search">
 			<i class="fa-solid fa-magnifying-glass"></i>
 		</button>
@@ -19,6 +24,10 @@ export default {
 	methods: {
 		search() {
 			this.searchFunction(this.city);
+		},
+		handlerKeyUp(e) {
+			if (e.key != "Enter") return;
+			this.search();
 		}
 	}
 }

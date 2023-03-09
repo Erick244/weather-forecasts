@@ -1,27 +1,13 @@
 <template>
-	<main class="main" v-if="forecastData.sys && flagImageUrl">
-		<CountryInfos 
-			:cityName="forecastData.name" 
-			:country="forecastData.sys.country" 
-		/>
-		<DayTime 
-			:icon="forecastData.weather[0].icon" 
-			:skyState="forecastData.weather[0].main" 
-			:cityName="forecastData.name"
-		/>
-		<SearchApp 
-		:searchFunction="getWeatherForecasts" 
-		/>
-		<ForecastInfos 
-			:minTemp="forecastData.main.temp_min" 
-			:maxTemp="forecastData.main.temp_max"
-			:currentTemp="forecastData.main.temp" 
-		/>
-		<OtherInfos 
-			:windSpeed="forecastData.wind.speed" 
-			:humidity="forecastData.main.humidity" 
-			:flagImage="flagImageUrl" 
-		/>
+	<!-- Criar uma variavel "loading" usando o Vuex para mostrar e sumir o skeletonPage -->
+	<main class="main" v-if="!$store.state.loading">
+		<CountryInfos :cityName="forecastData.name" :country="forecastData.sys.country" />
+		<DayTime :icon="forecastData.weather[0].icon" :skyState="forecastData.weather[0].main"
+			:cityName="forecastData.name" :timezone="forecastData.timezone"/>
+		<SearchApp :searchFunction="getWeatherForecasts" />
+		<ForecastInfos :minTemp="forecastData.main.temp_min" :maxTemp="forecastData.main.temp_max"
+			:currentTemp="forecastData.main.temp" />
+		<OtherInfos :windSpeed="forecastData.wind.speed" :humidity="forecastData.main.humidity" :flagImage="flagImageUrl" />
 	</main>
 	<SkeletonPage v-else />
 </template>
@@ -54,6 +40,7 @@ export default {
 	},
 	methods: {
 		getGeolocation() {
+			this.$store.commit('setLoading', true);
 			const getCurrentPositionHandler = async (loc) => {
 				const lat = loc.coords.latitude;
 				const lon = loc.coords.longitude;
@@ -72,13 +59,20 @@ export default {
 				this.getGeolocation();
 				return;
 			}
-			const weatherForecastsUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${WEATHER_FORECASTS_TOKEN}&lang=pt_br`;
-			axios.get(weatherForecastsUrl)
-				.then(resp => resp.data)
-				.then(data => {
-					this.flagImageUrl = `https://flagsapi.com/${data.sys.country}/flat/64.png`;
-					this.forecastData = data;
-				});
+
+			try {
+				this.$store.commit('setLoading', true);
+				const weatherForecastsUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${WEATHER_FORECASTS_TOKEN}&lang=pt_br`;
+
+				const resp = await axios.get(weatherForecastsUrl);
+				const data = await resp.data;
+				this.flagImageUrl = `https://flagsapi.com/${data.sys.country}/flat/64.png`;
+				this.forecastData = await data;
+				this.$store.commit('setLoading', false);
+			} catch (err) {
+				this.$store.commit('setLoading', false);
+			}
+
 		}
 	},
 	created() {

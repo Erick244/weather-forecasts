@@ -97,7 +97,7 @@ export default {
 
 .search .inputButton {
 	margin-left: 10px;
-	width: 30px;
+	width: 40px;
 	height: 30px;
 	border-radius: 10px;
 	background-color: #30303033;

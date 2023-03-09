@@ -14,7 +14,7 @@ import axios from "axios";
 
 export default {
 	name: "DayTime",
-	props: ["icon", "skyState", "cityName"],
+	props: ["icon", "skyState", "cityName", "timezone"],
 	data() {
 		return {
 			forecastImageUrl: `${baseForecastIconAPI}/${this.icon}@2x.png`,
