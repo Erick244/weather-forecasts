@@ -1,11 +1,13 @@
 <template>
-	<main class="main" v-if="forecastData.sys">
+	<main class="main" v-if="forecastData.sys && flagImageUrl">
 		<CountryInfos :cityName="forecastData.name" :country="forecastData.sys.country" />
-		<DayTime :icon="forecastData.weather[0].icon" :skyState="forecastData.weather[0].main"/>
-		<SearchApp />
-		<ForecastInfos />
-		<OtherInfos />
+		<DayTime :icon="forecastData.weather[0].icon" :skyState="forecastData.weather[0].main" />
+		<SearchApp :searchFunction="getWeatherForecasts" />
+		<ForecastInfos :minTemp="forecastData.main.temp_min" :maxTemp="forecastData.main.temp_max"
+			:currentTemp="forecastData.main.temp" />
+		<OtherInfos :windSpeed="forecastData.wind.speed" :humidity="forecastData.main.humidity" :flagImage="flagImageUrl" />
 	</main>
+	<SkeletonPage v-else />
 </template>
 
 <script>
@@ -14,6 +16,7 @@ import DayTime from '../view/DayTime.vue';
 import SearchApp from '../view/SearchApp.vue';
 import ForecastInfos from "../view/ForecastInfos.vue";
 import OtherInfos from "../view/OtherInfos.vue";
+import SkeletonPage from "./SkeletonPage.vue";
 import axios from "axios";
 import { API_TOKEN } from "@/config/.env";
 
@@ -24,11 +27,13 @@ export default {
 		DayTime,
 		SearchApp,
 		ForecastInfos,
-		OtherInfos
+		OtherInfos,
+		SkeletonPage
 	},
 	data() {
 		return {
-			forecastData: {}
+			forecastData: {},
+			flagImageUrl: ""
 		}
 	},
 	methods: {
@@ -42,12 +47,18 @@ export default {
 				const cityName = data[0].name;
 				this.getWeatherForecasts(cityName);
 			}
-			navigator.geolocation.getCurrentPosition(getCurrentPositionHandler);
+			navigator.geolocation.getCurrentPosition(getCurrentPositionHandler, () => {
+				this.getWeatherForecasts("New York");
+			});
 		},
-		getWeatherForecasts(cityName) {
-			const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${API_TOKEN}&lang=pt_br`;
-			axios.get(url)
-				.then(resp => this.forecastData = resp.data);
+		async getWeatherForecasts(cityName) {
+			const weatherForecastsUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${API_TOKEN}&lang=pt_br`;
+			axios.get(weatherForecastsUrl)
+				.then(resp => resp.data)
+				.then(data => {
+					this.flagImageUrl = `https://flagsapi.com/${data.sys.country}/flat/64.png`;
+					this.forecastData = data;
+				});
 		}
 	},
 	created() {
@@ -56,9 +67,9 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .main {
-	max-width: 1200px;
+	max-width: 500px;
 	padding: 50px;
 	background-color: #ffffff6c;
 	border-radius: 10px;

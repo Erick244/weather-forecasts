@@ -29,13 +29,14 @@ export default {
 			this.hours = hours;
 		}
 	},
-	mounted() {
+	updated() {
 		this.getHours();
+		this.forecastImageUrl = `${baseForecastIconAPI}/${this.icon}@2x.png`;
 	}
 }
 </script>
 
-<style>
+<style scoped>
 .dayTime {
 	display: flex;
 	flex-direction: column;

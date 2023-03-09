@@ -1,7 +1,7 @@
 <template>
 	<div class="countryInfos">
 		<div class="date">
-			{{ date }}
+			{{ getDate }}
 		</div>
 		<div class="city">
 			{{ cityName }}, {{ country }}
@@ -18,8 +18,8 @@ export default {
 			date: ""
 		}
 	},
-	methods: {
-		setDate() {
+	computed: {
+		getDate() {
 			const date = new Date();
 			let weekDay = date.getDay();
 			switch (weekDay) {
@@ -49,20 +49,18 @@ export default {
 			const mouth = date.getMonth();
 			const year = date.getFullYear();
 			
-			this.date = `${weekDay}, ${day}/${mouth}/${year}`;
+			return `${weekDay}, ${day}/${mouth}/${year}`;
 		}
-	},
-	mounted() {
-		this.setDate();
 	}
 }
 </script>
 
-<style>
+<style scoped>
 .countryInfos {
 	display: flex;
 	justify-content: space-between;
 	flex-wrap: wrap;
+	color: #fff;
 }
 
 .countryInfos .date {
